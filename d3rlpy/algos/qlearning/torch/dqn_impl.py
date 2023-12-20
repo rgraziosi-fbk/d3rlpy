@@ -43,6 +43,7 @@ class DQNImpl(DiscreteQFunctionMixin, QLearningAlgoImplBase):
         targ_q_func_forwarder: DiscreteEnsembleQFunctionForwarder,
         target_update_interval: int,
         gamma: float,
+        action_masks: dict[int, list[int]],
         device: str,
     ):
         super().__init__(
@@ -52,6 +53,7 @@ class DQNImpl(DiscreteQFunctionMixin, QLearningAlgoImplBase):
             device=device,
         )
         self._gamma = gamma
+        self.action_masks = action_masks
         self._q_func_forwarder = q_func_forwarder
         self._targ_q_func_forwarder = targ_q_func_forwarder
         self._target_update_interval = target_update_interval
@@ -102,7 +104,21 @@ class DQNImpl(DiscreteQFunctionMixin, QLearningAlgoImplBase):
             )
 
     def inner_predict_best_action(self, x: torch.Tensor) -> torch.Tensor:
-        return self._q_func_forwarder.compute_expected_q(x).argmax(dim=1)
+        q = self._q_func_forwarder.compute_expected_q(x)
+
+        # if provided, apply masks
+        if self.action_masks is not None:
+            # get last performed activity
+            argmax_indices = torch.argmax(x[:, -1, :], dim=1)
+
+            # get mask
+            masks = [torch.LongTensor(self.action_masks[idx.item()]) for idx in argmax_indices]
+
+            # apply mask
+            for i, mask in enumerate(masks):
+                q[i, mask] = float('-inf')
+
+        return torch.argmax(q, dim=1)
 
     def inner_sample_action(self, x: torch.Tensor) -> torch.Tensor:
         return self.inner_predict_best_action(x)

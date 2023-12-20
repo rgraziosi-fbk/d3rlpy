@@ -265,6 +265,7 @@ class DiscreteCQLConfig(LearnableConfig):
     n_critics: int = 1
     target_update_interval: int = 8000
     alpha: float = 1.0
+    action_masks: dict[int, list[int]] = None
 
     def create(self, device: DeviceArg = False) -> "DiscreteCQL":
         return DiscreteCQL(self, device)
@@ -314,6 +315,7 @@ class DiscreteCQL(QLearningAlgoBase[DiscreteCQLImpl, DiscreteCQLConfig]):
             target_update_interval=self._config.target_update_interval,
             gamma=self._config.gamma,
             alpha=self._config.alpha,
+            action_masks=self._config.action_masks,
             device=self._device,
         )
 

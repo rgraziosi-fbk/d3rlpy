@@ -214,6 +214,7 @@ class DiscreteCQLImpl(DoubleDQNImpl):
         target_update_interval: int,
         gamma: float,
         alpha: float,
+        action_masks: dict[int, list[int]],
         device: str,
     ):
         super().__init__(
@@ -224,6 +225,7 @@ class DiscreteCQLImpl(DoubleDQNImpl):
             targ_q_func_forwarder=targ_q_func_forwarder,
             target_update_interval=target_update_interval,
             gamma=gamma,
+            action_masks=action_masks,
             device=device,
         )
         self._alpha = alpha
