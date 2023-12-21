@@ -116,7 +116,9 @@ class DQNImpl(DiscreteQFunctionMixin, QLearningAlgoImplBase):
 
             # apply mask
             for i, mask in enumerate(masks):
-                q[i, mask] = float('-inf')
+                q_values_to_keep = q[i, mask]
+                q[i] = float('-inf')
+                q[i, mask] = q_values_to_keep
 
         return torch.argmax(q, dim=1)
 
